@@ -24,10 +24,16 @@ def write_args_to_file():
         log_file.write("\n")
         log_file.write(str(sync_time))
 
-def copy_files():
+def sync_files():
     try:
         shutil.copytree(src_path, dst_path)
+        print("Replica folder created")
     except:
-        print("Error: Replica folder already created")
+        try:
+            shutil.rmtree(dst_path)
+            shutil.copytree(src_path, dst_path)
+        finally:
+            print("Files synchronized!")
+
 if __name__ == "__main__":
-    copy_files()
+    sync_files()
