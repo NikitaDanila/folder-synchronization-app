@@ -1,5 +1,4 @@
-#Folder paths, synchronization interval and log file path should be provided using the command line arguments;
-import argparse
+import argparse, shutil
 
 parser = argparse.ArgumentParser()
 
@@ -15,7 +14,6 @@ dst_path = args.dst
 log_path = args.log
 sync_time = args.sync_time
 
-
 def write_args_to_file():
     with open('args_file.txt', 'w') as log_file:
         log_file.write(src_path)
@@ -25,3 +23,11 @@ def write_args_to_file():
         log_file.write(log_path)
         log_file.write("\n")
         log_file.write(str(sync_time))
+
+def copy_files():
+    try:
+        shutil.copytree(src_path, dst_path)
+    except:
+        print("Error: Replica folder already created")
+if __name__ == "__main__":
+    copy_files()
