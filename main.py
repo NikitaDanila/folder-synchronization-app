@@ -1,4 +1,4 @@
-import argparse, shutil
+import argparse, shutil, pathlib
 
 parser = argparse.ArgumentParser()
 
@@ -13,6 +13,8 @@ src_path = args.src
 dst_path = args.dst
 log_path = args.log
 sync_time = args.sync_time
+
+subfolders, files = [], []
 
 def write_args_to_file():
     with open('args_file.txt', 'w') as log_file:
@@ -35,5 +37,19 @@ def sync_files():
         finally:
             print("Files synchronized!")
 
+def walk_dir(path):
+    entries = pathlib.Path(path)
+    for entry in entries.iterdir():
+        if entry.is_dir():
+            print(f'Folder: {entry.name}')
+            subfolders.append(entry.name)
+            walk_dir(entry)
+        else: 
+            files.append(entry.name)
+            print(entry.name)
+
+
 if __name__ == "__main__":
-    sync_files()
+    # sync_files()
+    walk_dir(src_path)
+    print(subfolders, files)
