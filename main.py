@@ -14,7 +14,8 @@ dst_path = args.dst
 log_path = args.log
 sync_time = args.sync_time
 
-subfolders, files = [], []
+src_folders, src_files = [], []
+dst_folders, dst_files = [], []
 
 def write_args_to_file():
     with open('args_file.txt', 'w') as log_file:
@@ -37,19 +38,32 @@ def sync_files():
         finally:
             print("Files synchronized!")
 
-def walk_dir(path):
+def walk_src_dir(path):
     entries = pathlib.Path(path)
     for entry in entries.iterdir():
         if entry.is_dir():
-            print(f'Folder: {entry.name}')
-            subfolders.append(entry.name)
-            walk_dir(entry)
+            # print(f'Folder: {entry.name}')
+            src_folders.append(entry.name)
+            walk_src_dir(entry)
         else: 
-            files.append(entry.name)
-            print(entry.name)
+            src_files.append(entry.name)
+            # print(entry.name)
+
+def walk_dst_dir(path):
+    entries = pathlib.Path(path)
+    for entry in entries.iterdir():
+        if entry.is_dir():
+            # print(f'Folder: {entry.name}')
+            dst_folders.append(entry.name)
+            walk_dst_dir(entry)
+        else: 
+            dst_files.append(entry.name)
+            # print(entry.name)
 
 
 if __name__ == "__main__":
     # sync_files()
-    walk_dir(src_path)
-    print(subfolders, files)
+    walk_src_dir(src_path)
+    walk_dst_dir(dst_path)
+    print(f'src: {src_folders}, {src_files}')
+    print(f'dst: {dst_folders}, {dst_files}')
