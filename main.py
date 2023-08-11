@@ -1,4 +1,4 @@
-import argparse, shutil, pathlib
+import argparse, shutil, pathlib, os
 
 parser = argparse.ArgumentParser()
 
@@ -27,14 +27,19 @@ def write_args_to_file():
         log_file.write("\n")
         log_file.write(str(sync_time))
 
-def sync_files():
+def sync_src_to_dst(dir1, dir2):
+    """
+    Function which deletes replica folder and copies 
+    source folder completely
+    di1 is source folder, dir2 is replica folder
+    """
     try:
-        shutil.copytree(src_path, dst_path)
+        shutil.copytree(dir1, dir2)
         print("Replica folder created")
     except:
         try:
             shutil.rmtree(dst_path)
-            shutil.copytree(src_path, dst_path)
+            shutil.copytree(dir1, dir2)
         finally:
             print("Files synchronized!")
 
@@ -60,10 +65,17 @@ def walk_dst_dir(path):
             dst_files.append(entry.name)
             # print(entry.name)
 
+def sync_files(dir1, dir2):
+    walk_src_dir(dir1)
+    walk_dst_dir(dir2)
+    for folder in src_folders:
+        if folder not in dst_folders:
+            shutil.copytree(os.path.join(src_path,folder),os.path.join(dst_path,folder))
 
 if __name__ == "__main__":
     # sync_files()
-    walk_src_dir(src_path)
-    walk_dst_dir(dst_path)
-    print(f'src: {src_folders}, {src_files}')
-    print(f'dst: {dst_folders}, {dst_files}')
+    # walk_src_dir(src_path)
+    # walk_dst_dir(dst_path)
+    sync_files(src_path, dst_path)
+    # print(f'src: {src_folders}, {src_files}')
+    # print(f'dst: {dst_folders}, {dst_files}')
