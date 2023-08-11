@@ -24,10 +24,16 @@ def sync_files(src_folder, dst_folder, log_path):
         for file in files:
             if file not in dst_folder.iterdir():
                 shutil.copy2(Path(dirpath) / file ,dst_folder)
-                print(f"{file} was copied")
+                print(f"{file} was added")
                 # Path("log_file.txt").write_text("\n".join(f"{file} was copied"), encoding="utf-8")
                 with open("log_file.txt",'a') as log_file:
-                    log_file.write(f"{file} was copied\n")
+                    log_file.write(f"{file} was added\n")
+            if Path(file).stat().st_mtime > Path(dst_folder).joinpath(file).stat().st_mtime:
+                print(f"{file} was modified")
+                with open("log_file.txt",'a') as log_file:
+                    shutil.copy2(Path(dirpath) / file ,dst_folder)
+                    log_file.write(f"{file} was modified\n")
+
 
 
 if __name__ == "__main__":
