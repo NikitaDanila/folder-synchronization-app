@@ -47,37 +47,44 @@ def walk_src_dir(path):
     entries = pathlib.Path(path)
     for entry in entries.iterdir():
         if entry.is_dir():
-            # print(f'Folder: {entry.name}')
-            src_folders.append(entry.name)
+            # print(f'Folder: {entry}')
+            src_folders.append(entry)
             walk_src_dir(entry)
         else: 
-            src_files.append(entry.name)
-            # print(entry.name)
+            # print(f'File: {entry}')
+            src_files.append(entry)
 
 def walk_dst_dir(path):
     entries = pathlib.Path(path)
     for entry in entries.iterdir():
         if entry.is_dir():
-            # print(f'Folder: {entry.name}')
-            dst_folders.append(entry.name)
+            print(f'Folder: {entry}')
+            dst_folders.append(entry)
             walk_dst_dir(entry)
         else: 
-            dst_files.append(entry.name)
-            # print(entry.name)
+            print(f'File: {entry}')
+            dst_files.append(entry)
 
 def sync_files(dir1, dir2):
     walk_src_dir(dir1)
     walk_dst_dir(dir2)
+    try:
+        #Deleting folders that are not synched
+        for folder in dst_folders:
+            #if the folder is in dst but not in src, then delete the folder
+            if folder not in src_folders:
+                shutil.rmtree(os.path.join(dst_path, folder))
+    finally:
+        print("No files were modified")
     #Copying folders that are not synched
-    for folder in src_folders:
-        #if the folder is not in dst but is in src, then copy the folder
-        if folder not in dst_folders:
-            shutil.copytree(os.path.join(src_path,folder),os.path.join(dst_path,folder))
-    #Deleting folders that are not synched
-    for folder in dst_folders:
-        #if the folder is in dst but not in src, then delete the folder
-        if folder not in src_folders:
-            shutil.rmtree(os.path.join(dst_path, folder))
+    try:
+        for folder in src_folders:
+            #if the folder is not in dst but is in src, then copy the folder
+            if folder not in dst_folders:
+                shutil.copytree(os.path.join(src_path,folder),os.path.join(dst_path,folder))
+    finally:
+        print("No files were copied")
+    
 
 if __name__ == "__main__":
     # sync_files()
