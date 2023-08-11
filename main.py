@@ -68,9 +68,16 @@ def walk_dst_dir(path):
 def sync_files(dir1, dir2):
     walk_src_dir(dir1)
     walk_dst_dir(dir2)
+    #Copying folders that are not synched
     for folder in src_folders:
+        #if the folder is not in dst but is in src, then copy the folder
         if folder not in dst_folders:
             shutil.copytree(os.path.join(src_path,folder),os.path.join(dst_path,folder))
+    #Deleting folders that are not synched
+    for folder in dst_folders:
+        #if the folder is in dst but not in src, then delete the folder
+        if folder not in src_folders:
+            shutil.rmtree(os.path.join(dst_path, folder))
 
 if __name__ == "__main__":
     # sync_files()
