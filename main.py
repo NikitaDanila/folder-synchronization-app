@@ -35,24 +35,34 @@ def sync_files(src_folder, dst_folder, log_path):
             log_file.write("Folder replica was created\n")
 
     for src_file in src_folder.glob("*"):
-        if src_file.is_file():
-            relative_path = src_file.relative_to(src_folder)
-            dst_file = dst_folder / relative_path
-            match dst_file.exists():
-                case True:
-                    if src_file.stat().st_mtime > dst_file.stat().st_mtime:
-                        shutil.copy2(src_file, dst_file)
-                        print(f"{dst_file} was modified")
-                        with open("log_file.txt", 'a') as log_file:
-                            log_file.write(f"{dst_file} was modified\n")
-                case False:
+        relative_path = src_file.relative_to(src_folder)
+        dst_file = dst_folder / relative_path
+        match dst_file.exists():
+            case True:
+                if src_file.stat().st_mtime > dst_file.stat().st_mtime:
                     shutil.copy2(src_file, dst_file)
-                    print(f"{dst_file} was copied")
+                    print(f"{dst_file.name} was modified")
                     with open("log_file.txt", 'a') as log_file:
-                        log_file.write(f"{dst_file} was copied\n")
-                    break
-                case _:
-                    pass
+                        log_file.write(f"{dst_file.name} was modified\n")
+                continue
+            case False:
+                shutil.copy2(src_file, dst_file)
+                print(f"{dst_file.name} was copied")
+                with open("log_file.txt", 'a') as log_file:
+                    log_file.write(f"{dst_file.name} was copied\n")
+                continue
+            case _:
+                pass
+
+    for dst_file in dst_folder.glob('*'):
+        if dst_file.is_file():
+            re_path = dst_file.relative_to(dst_folder)
+        for dirpath, dirname, files in os.walk(src_folder):
+            if str(re_path) not in files:
+                Path(dst_folder).joinpath(re_path).unlink(re_path)
+                print(f"{re_path} was deleted")
+                with open("log_file.txt", 'a') as log_file:
+                    log_file.write(f"{re_path} was deleted\n")
 
 
 if __name__ == "__main__":
