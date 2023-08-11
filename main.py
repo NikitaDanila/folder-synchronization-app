@@ -70,10 +70,6 @@ async def sync_files(src_folder, dst_folder, log_path, wait_time):
         print('Synchronizing...')
 
 
-async def main():
-    task = asyncio.Task(sync_files(src_path, dst_path, log_path, sync_time))
-
-
 if __name__ == "__main__":
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
