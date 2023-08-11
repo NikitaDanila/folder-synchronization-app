@@ -1,5 +1,5 @@
-import argparse, shutil, pathlib, os
-
+import argparse, shutil, os
+from pathlib import Path
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-s','--src', help='Path to source folder', required=True)
@@ -9,13 +9,13 @@ parser.add_argument('-t','--sync_time', type=int, help='Interval of time for syn
 
 args = parser.parse_args()
 
-src_path = args.src
-dst_path = args.dst
+src_path = Path(args.src)
+dst_path = Path(args.dst)
 log_path = args.log
 sync_time = args.sync_time
 
-src_folders, src_files = [], []
-dst_folders, dst_files = [], []
+# src_folders, src_files = [], []
+# dst_folders, dst_files = [], []
 
 def write_args_to_file():
     with open('args_file.txt', 'w') as log_file:
@@ -27,69 +27,48 @@ def write_args_to_file():
         log_file.write("\n")
         log_file.write(str(sync_time))
 
-def sync_src_to_dst(dir1, dir2):
-    """
-    Function which deletes replica folder and copies 
-    source folder completely
-    di1 is source folder, dir2 is replica folder
-    """
-    try:
-        shutil.copytree(dir1, dir2)
-        print("Replica folder created")
-    except:
-        try:
-            shutil.rmtree(dst_path)
-            shutil.copytree(dir1, dir2)
-        finally:
-            print("Files synchronized!")
 
-def walk_src_dir(path):
-    entries = pathlib.Path(path)
-    for entry in entries.iterdir():
-        if entry.is_dir():
-            # print(f'Folder: {entry}')
-            src_folders.append(entry)
-            walk_src_dir(entry)
-        else: 
-            # print(f'File: {entry}')
-            src_files.append(entry)
+def sync_files(src_folder, dst_folder):
+    if not Path.exists(dst_folder):
+        Path.mkdir(dst_folder)
 
-def walk_dst_dir(path):
-    entries = pathlib.Path(path)
-    for entry in entries.iterdir():
-        if entry.is_dir():
-            print(f'Folder: {entry}')
-            dst_folders.append(entry)
-            walk_dst_dir(entry)
-        else: 
-            print(f'File: {entry}')
-            dst_files.append(entry)
+    for dirpath, dirnames , files in os.walk(src_folder):
+        print(dirpath)
+        relative_path = Path(dirpath) / src_folder
+        print(relative_path)
+        replica_root = Path(dst_folder) / relative_path
+        print(replica_root)
 
-def sync_files(dir1, dir2):
-    walk_src_dir(dir1)
-    walk_dst_dir(dir2)
-    try:
-        #Deleting folders that are not synched
-        for folder in dst_folders:
-            #if the folder is in dst but not in src, then delete the folder
-            if folder not in src_folders:
-                shutil.rmtree(os.path.join(dst_path, folder))
-    finally:
-        print("No files were modified")
-    #Copying folders that are not synched
-    try:
-        for folder in src_folders:
-            #if the folder is not in dst but is in src, then copy the folder
-            if folder not in dst_folders:
-                shutil.copytree(os.path.join(src_path,folder),os.path.join(dst_path,folder))
-    finally:
-        print("No files were copied")
-    
+        for file in files:
+            source_file_path = Path(dirpath)/ file
+            replica_file_path = Path(replica_root)/ file
+            
+
+def synchronize_folders(source_folder, replica_folder):
+    # Create replica folder if it doesn't exist
+    if not os.path.exists(replica_folder):
+        os.makedirs(replica_folder)
+
+    for root, _, files in os.walk(source_folder):
+        relative_path = os.path.relpath(root, source_folder)
+        replica_root = os.path.join(replica_folder, relative_path)
+
+        for file in files:
+            source_file_path = os.path.join(root, file)
+            replica_file_path = os.path.join(replica_root, file)
+
+            if not os.path.exists(replica_file_path) or \
+               os.path.getmtime(source_file_path) > os.path.getmtime(replica_file_path):
+                # Copy the file from source to replica if it's missing or updated
+                shutil.copy2(source_file_path, replica_file_path)
+                print(f"Copied: {source_file_path} -> {replica_file_path}")
 
 if __name__ == "__main__":
+
     # sync_files()
     # walk_src_dir(src_path)
     # walk_dst_dir(dst_path)
-    sync_files(src_path, dst_path)
+    # sync_files(src_path, dst_path)
+    synchronize_folders(src_path, dst_path)
     # print(f'src: {src_folders}, {src_files}')
     # print(f'dst: {dst_folders}, {dst_files}')
